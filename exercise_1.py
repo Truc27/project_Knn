@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from collections import Counter
 from sklearn.model_selection import train_test_split
 data = pd.read_csv("dataset.csv")
@@ -35,26 +34,29 @@ class KNN:
         most_common = Counter(k_nearest_labels).most_common(1)[0][0]
         return most_common
 
+    def distance_table(self, new_point):
+        distances = [euclidean_distance(point, new_point)
+                     for point in self.X_train]
+        distances_table = pd.DataFrame({
+            'X1': self.X_train[:, 0],
+            'X2': self.X_train[:, 1],
+            'Label': self.y_train,
+            'Distance': distances
+        }).sort_values(by='Distance', ascending=True).reset_index(drop=True)
+        print("Bảng khoảng cách:")
+        print(distances_table)
+        print("-" * 50)
+        return distances_table
 
-knn = KNN(k=3)
+
+knn = KNN(int(input("nhap k: ")))
 knn.fit(X_train, y_train)
 predictions = knn.predict(X_test)
 accuracy = np.mean(predictions == y_test) * 100
 print(f"Accuracy: {accuracy:.2f}%")
-
-new_points = np.array([[8, 1.5], [4.5, 7]])
+p1 = np.array([float(x) for x in input("Nhap diem can tim 1: ").split(', ')])
+new_points = np.array([p1])
 new_predictions = knn.predict(new_points)
-plt.scatter(X_train[y_train == 'B', 0], X_train[y_train == 'B', 1],
-            color='tab:green', label='chu B')
-plt.scatter(X_train[y_train == 'A', 0], X_train[y_train == 'A', 1],
-            color='tab:red', label='chu A')
-plt.scatter(new_points[:, 0], new_points[:, 1],
-            color='tab:olive', label='Điểm dự đoán')
-plt.xlabel("x1")
-plt.ylabel("x2")
-plt.legend()
-plt.show()
-
-print("\n Dự đoán cho hai nhân vật màu vàng:")
-print(f"Điểm (8, 1.5) thuộc lớp: {new_predictions[0]}")
-print(f"Điểm (4.5, 7) thuộc lớp: {new_predictions[1]}")
+lable1 = knn.distance_table(p1)
+print("\n Dự đoán cho hai điểm:")
+print(f"Điểm {p1} thuộc lớp: {new_predictions[0]}")
